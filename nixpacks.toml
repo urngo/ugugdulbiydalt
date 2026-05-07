@@ -1,5 +1,2 @@
-[phases.setup]
-nixPkgs = ["php83", "php83Extensions.mysqli", "php83Extensions.session", "apacheHttpd"]
-
 [start]
-cmd = "php -S 0.0.0.0:80 -t ."
+cmd = "php -S 0.0.0.0:8080 -t ."
