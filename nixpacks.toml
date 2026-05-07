@@ -1,5 +1,2 @@
 [start]
-cmd = "php -S 0.0.0.0:8080 -t ."
-
-[variables]
-PHP_EXTENSIONS = "mysqli,pdo_mysql,session"
+cmd = "php -S 0.0.0.0:8080 -t . -c php.ini"
