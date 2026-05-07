@@ -4,37 +4,37 @@ if (!($_SESSION["auth"] ?? false)) {
     header("Location: login.php");
     exit;
 }
-
-$conn = new mysqli("127.0.0.1", "guest", "pass123", "biydaalt");
+ 
+$conn = new mysqli(getenv("MYSQLHOST"), getenv("MYSQLUSER"), getenv("MYSQLPASSWORD"), getenv("MYSQLDATABASE"), (int)getenv("MYSQLPORT"));
 if ($conn->connect_error) die("Connection failed");
-
+ 
 $employeeName = $_SESSION["employeeName"] ?? "Ажилтан";
 $employeeID   = $_SESSION["employeeID"] ?? 1;
-
+ 
 $errors  = [];
 $success = "";
 $queryRows  = [];
 $queryText  = "";
 $sqlOutput  = "";
 $sqlError   = "";
-
+ 
 // Logout
 if (isset($_GET["logout"])) {
     session_destroy();
     header("Location: login.php");
     exit;
 }
-
+ 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $action = $_POST["action"] ?? "";
-
+ 
     if ($action === "add_package") {
         $trackCode   = trim($_POST["trackCode"] ?? "");
         $phoneNumber = trim($_POST["phoneNumber"] ?? "");
         $shelf       = trim($_POST["shelf"] ?? "");
         $price       = (float)($_POST["price"] ?? 0);
         $status      = $_POST["status"] ?? "Pending";
-
+ 
         if ($trackCode && $phoneNumber) {
             $stmt = $conn->prepare(
                 "INSERT INTO packages (trackCode, phoneNumber, shelf, createdBy, status, price, createdAt, isDeleted)
@@ -49,12 +49,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             $errors[] = "Трек код болон утасны дугаар шаардлагатай.";
         }
-
+ 
     } elseif ($action === "mark_picked") {
         $packageID = (int)($_POST["packageID"] ?? 0);
         $conn->query("UPDATE packages SET isDeleted = 1 WHERE packageID = $packageID AND isDeleted = 0");
         $success = "✓ Илгээмж авагдсан гэж тэмдэглэгдлээ.";
-
+ 
     } elseif ($action === "pickup_by_phone") {
         $phone = trim($_POST["pickupPhone"] ?? "");
         if ($phone) {
@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->execute();
             $success = "✓ " . $conn->affected_rows . " илгээмж авагдсан гэж тэмдэглэгдлээ.";
         }
-
+ 
     } elseif ($action === "query_packages") {
         $queryText = trim($_POST["queryText"] ?? "");
         $stmt = $conn->prepare(
@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) $queryRows[] = $row;
         if (!$queryRows) $success = "Хайлтанд тохирох илгээмж олдсонгүй.";
-
+ 
     } elseif ($action === "sql_query") {
         $raw = trim($_POST["queryText"] ?? "");
         try {
@@ -105,17 +105,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 }
-
+ 
 // Stats
 $stats = [];
 $r = $conn->query("SELECT COUNT(*) as total, SUM(price) as revenue FROM packages WHERE isDeleted = 0");
 $row = $r->fetch_assoc();
 $stats["active"]   = $row["total"] ?? 0;
 $stats["revenue"]  = $row["revenue"] ?? 0;
-
+ 
 $r2 = $conn->query("SELECT COUNT(*) as c FROM packages WHERE isDeleted = 1");
 $stats["picked"]   = $r2->fetch_assoc()["c"] ?? 0;
-
+ 
 $r3 = $conn->query("SELECT COUNT(*) as c FROM packages WHERE isDeleted = 0 AND (status = 'Pending' OR status IS NULL)");
 $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
 ?>
@@ -157,10 +157,10 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
     pointer-events: none;
     z-index: 0;
   }
-
+ 
   /* LAYOUT */
   .layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }
-
+ 
   /* SIDEBAR */
   .sidebar {
     width: 220px;
@@ -190,7 +190,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
     margin-bottom: 16px;
   }
   .sidebar-user strong { display: block; color: var(--text); font-size: 0.9rem; margin-bottom: 2px; }
-
+ 
   nav.sidebar-nav { flex: 1; }
   .nav-item {
     display: block;
@@ -212,7 +212,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
     background: rgba(240,192,64,0.06);
   }
   .nav-item .icon { margin-right: 10px; }
-
+ 
   .sidebar-bottom { padding: 20px 24px; border-top: 1px solid var(--border); }
   .logout-btn {
     display: block;
@@ -227,10 +227,10 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
     transition: all 0.2s;
   }
   .logout-btn:hover { color: var(--error); border-color: var(--error); }
-
+ 
   /* MAIN */
   .main { margin-left: 220px; padding: 40px 36px; flex: 1; }
-
+ 
   /* TOPBAR */
   .topbar {
     display: flex;
@@ -239,7 +239,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
     margin-bottom: 36px;
   }
   .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; }
-
+ 
   /* STATS */
   .stats-grid {
     display: grid;
@@ -258,7 +258,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
   .stat-value.yellow { color: var(--accent); }
   .stat-value.orange { color: var(--accent2); }
   .stat-value.green  { color: var(--success); }
-
+ 
   /* PANELS */
   .panel {
     background: var(--surface);
@@ -277,7 +277,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
     font-weight: 600;
   }
   .panel-body { padding: 22px; }
-
+ 
   /* FORM GRID */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
@@ -296,7 +296,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
   }
   .field input:focus, .field select:focus { border-color: var(--accent); }
   .field select option { background: var(--surface); }
-
+ 
   .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border: none; border-radius: 6px; font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
   .btn-primary { background: var(--accent); color: #0d0f14; }
   .btn-primary:hover { background: #f8d060; }
@@ -304,16 +304,16 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
   .btn-danger:hover { background: rgba(239,68,68,0.2); }
   .btn-search { background: var(--surface2); color: var(--accent); border: 1px solid var(--border); }
   .btn-search:hover { border-color: var(--accent); }
-
+ 
   .form-row { display: flex; gap: 12px; align-items: flex-end; margin-top: 0; }
   .form-row .field { flex: 1; }
-
+ 
   /* ALERTS */
   .alert { padding: 14px 18px; border-radius: 6px; margin-bottom: 24px; font-size: 0.9rem; animation: fadeUp 0.3s; }
   .alert-success { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25); color: var(--success); }
   .alert-error   { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); color: var(--error); }
   @keyframes fadeUp { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform: translateY(0); } }
-
+ 
   /* TABLE */
   .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
   .data-table th { padding: 10px 14px; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 600; }
@@ -325,16 +325,16 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
   .badge-deleted { background: rgba(107,114,128,0.12); color: var(--muted); }
   .badge-pending { background: rgba(240,192,64,0.12); color: var(--accent); }
   .mono { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 0.9rem; color: var(--accent); }
-
+ 
   /* SQL output table */
   #sql-result table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
   #sql-result th { background: var(--bg); padding: 10px 12px; text-align: left; border: 1px solid var(--border); font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
   #sql-result td { padding: 9px 12px; border: 1px solid var(--border); }
   #sql-result tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
-
+ 
   .section { display: none; }
   .section.active { display: block; }
-
+ 
   @media (max-width: 900px) {
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .form-grid, .form-grid.cols3 { grid-template-columns: 1fr; }
@@ -343,7 +343,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
 </head>
 <body>
 <div class="layout">
-
+ 
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">КАРГО<span>.</span>МН</div>
@@ -363,20 +363,20 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
       <a href="?logout=1" class="logout-btn">Гарах</a>
     </div>
   </aside>
-
+ 
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
       <div class="page-title" id="page-title">ТОЙМ</div>
     </div>
-
+ 
     <?php if ($success): ?>
       <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
     <?php foreach ($errors as $e): ?>
       <div class="alert alert-error"><?= htmlspecialchars($e) ?></div>
     <?php endforeach; ?>
-
+ 
     <!-- OVERVIEW -->
     <div class="section active" id="section-overview">
       <div class="stats-grid">
@@ -397,7 +397,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
           <div class="stat-value" style="font-size:1.5rem; color:var(--text)">₮<?= number_format($stats["revenue"], 0, '.', ',') ?></div>
         </div>
       </div>
-
+ 
       <div class="panel">
         <div class="panel-header">Сүүлийн 10 илгээмж</div>
         <div class="panel-body" style="padding:0;">
@@ -441,7 +441,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
         </div>
       </div>
     </div>
-
+ 
     <!-- ADD PACKAGE -->
     <div class="section" id="section-add">
       <div class="panel">
@@ -479,7 +479,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
         </div>
       </div>
     </div>
-
+ 
     <!-- PICKUP -->
     <div class="section" id="section-pickup">
       <div class="panel">
@@ -499,7 +499,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
         </div>
       </div>
     </div>
-
+ 
     <!-- SEARCH -->
     <div class="section" id="section-search">
       <div class="panel">
@@ -553,7 +553,7 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
         <?php endif; ?>
       </div>
     </div>
-
+ 
     <!-- SQL -->
     <div class="section" id="section-sql">
       <div class="panel">
@@ -578,10 +578,10 @@ $stats["pending"]  = $r3->fetch_assoc()["c"] ?? 0;
         </div>
       </div>
     </div>
-
+ 
   </main>
 </div>
-
+ 
 <script>
 const titles = {
   overview: 'ТОЙМ',
@@ -590,7 +590,7 @@ const titles = {
   search: 'ХАЙХ',
   sql: 'SQL QUERY'
 };
-
+ 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -600,7 +600,7 @@ function showSection(id) {
   ].classList.add('active');
   document.getElementById('page-title').textContent = titles[id];
 }
-
+ 
 <?php
 // Auto-navigate to correct section based on action
 $actionMap = ['add_package'=>'add','mark_picked'=>'search','pickup_by_phone'=>'pickup','query_packages'=>'search','sql_query'=>'sql'];
