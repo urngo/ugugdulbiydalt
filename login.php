@@ -4,22 +4,22 @@ if ($_SESSION["auth"] ?? false) {
     header("Location: dashboard.php");
     exit;
 }
-
-$conn = new mysqli("127.0.0.1", "guest", "pass123", "biydaalt");
+ 
+$conn = new mysqli(getenv("MYSQLHOST"), getenv("MYSQLUSER"), getenv("MYSQLPASSWORD"), getenv("MYSQLDATABASE"), (int)getenv("MYSQLPORT"));
 if ($conn->connect_error) die("Connection failed");
-
+ 
 $error = "";
-
+ 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST["username"] ?? "");
     $password = $_POST["password"] ?? "";
-
+ 
     $stmt = $conn->prepare("SELECT employeeID, employeeName, password FROM employees WHERE employeeName = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
-
+ 
     if ($user && $user["password"] === md5($password)) {
         $_SESSION["auth"] = true;
         $_SESSION["employeeID"] = $user["employeeID"];
@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     background-size: 40px 40px;
     pointer-events: none;
   }
-
+ 
   /* big decorative text */
   .deco {
     position: fixed;
@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     pointer-events: none;
     user-select: none;
   }
-
+ 
   .card {
     position: relative;
     z-index: 1;
@@ -101,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-
+ 
   .brand {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 2rem;
@@ -115,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     font-size: 0.85rem;
     margin-bottom: 36px;
   }
-
+ 
   .field { margin-bottom: 20px; }
   .field label {
     display: block;
@@ -139,7 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     transition: border-color 0.2s;
   }
   .field input:focus { border-color: var(--accent); }
-
+ 
   .error-box {
     background: rgba(239,68,68,0.08);
     border: 1px solid rgba(239,68,68,0.3);
@@ -149,7 +149,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     font-size: 0.88rem;
     margin-bottom: 20px;
   }
-
+ 
   .btn {
     width: 100%;
     padding: 14px;
@@ -166,7 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   }
   .btn:hover { background: #f8d060; }
   .btn:active { transform: scale(0.99); }
-
+ 
   .footer-links {
     margin-top: 28px;
     display: flex;
@@ -179,7 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     transition: color 0.2s;
   }
   .footer-links a:hover { color: var(--accent); }
-
+ 
   .divider {
     border: none;
     border-top: 1px solid var(--border);
@@ -202,11 +202,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <div class="card">
   <div class="brand">КАРГО<span>.</span>МН</div>
   <div class="subtitle">Ажилтны нэвтрэх хэсэг</div>
-
+ 
   <?php if ($error): ?>
     <div class="error-box"><?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
-
+ 
   <form method="post" action="login.php">
     <div class="field">
       <label for="username">Нэвтрэх нэр</label>
@@ -218,7 +218,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
     <button class="btn" type="submit">НЭВТРЭХ</button>
   </form>
-
+ 
   <hr class="divider">
   <div class="footer-links">
     <a href="index.php">← Хайлт руу буцах</a>
