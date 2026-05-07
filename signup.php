@@ -4,18 +4,18 @@ if ($_SESSION["auth"] ?? false) {
     header("Location: dashboard.php");
     exit;
 }
-
-$conn = new mysqli("127.0.0.1", "guest", "pass123", "biydaalt");
+ 
+$conn = new mysqli(getenv("MYSQLHOST"), getenv("MYSQLUSER"), getenv("MYSQLPASSWORD"), getenv("MYSQLDATABASE"), (int)getenv("MYSQLPORT"));
 if ($conn->connect_error) die("Connection failed");
-
+ 
 $error = "";
 $success = "";
-
+ 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST["username"] ?? "");
     $password = $_POST["password"] ?? "";
     $confirm  = $_POST["confirm"] ?? "";
-
+ 
     if (strlen($username) < 3) {
         $error = "Нэвтрэх нэр хамгийн багадаа 3 тэмдэгт байх ёстой.";
     } elseif (strlen($password) < 6) {
@@ -115,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   .brand { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 4px; color: var(--accent); margin-bottom: 4px; }
   .brand span { color: var(--accent2); }
   .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 36px; }
-
+ 
   .field { margin-bottom: 20px; }
   .field label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
   .field input {
@@ -131,16 +131,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     transition: border-color 0.2s;
   }
   .field input:focus { border-color: var(--accent); }
-
+ 
   .hint { font-size: 0.75rem; color: var(--muted); margin-top: 5px; }
-
+ 
   .error-box { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); color: var(--error); padding: 12px 16px; border-radius: 6px; font-size: 0.88rem; margin-bottom: 20px; }
   .success-box { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.3); color: var(--success); padding: 12px 16px; border-radius: 6px; font-size: 0.88rem; margin-bottom: 20px; }
-
+ 
   .btn { width: 100%; padding: 14px; background: var(--accent2); color: #fff; border: none; border-radius: 6px; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 3px; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 4px; }
   .btn:hover { background: #f06830; }
   .btn:active { transform: scale(0.99); }
-
+ 
   hr { border: none; border-top: 1px solid var(--border); margin: 28px 0 24px; }
   .footer-links { display: flex; justify-content: space-between; font-size: 0.83rem; }
   .footer-links a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
@@ -152,14 +152,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <div class="card">
   <div class="brand">КАРГО<span>.</span>МН</div>
   <div class="subtitle">Шинэ ажилтан бүртгүүлэх</div>
-
+ 
   <?php if ($error): ?>
     <div class="error-box"><?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
   <?php if ($success): ?>
     <div class="success-box"><?= htmlspecialchars($success) ?></div>
   <?php endif; ?>
-
+ 
   <?php if (!$success): ?>
   <form method="post" action="signup.php">
     <div class="field">
@@ -179,7 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <button class="btn" type="submit">БҮРТГҮҮЛЭХ</button>
   </form>
   <?php endif; ?>
-
+ 
   <hr>
   <div class="footer-links">
     <a href="index.php">← Хайлт руу буцах</a>
@@ -188,3 +188,4 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </div>
 </body>
 </html>
+ 
