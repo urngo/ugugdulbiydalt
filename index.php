@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli("127.0.0.1", "guest", "pass123", "biydaalt");
+$conn = new mysqli(getenv("MYSQLHOST"), getenv("MYSQLUSER"), getenv("MYSQLPASSWORD"), getenv("MYSQLDATABASE"), (int)getenv("MYSQLPORT"));
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -56,7 +56,7 @@ if ($query !== "") {
     min-height: 100vh;
     overflow-x: hidden;
   }
-
+ 
   /* BG GRID */
   body::before {
     content: '';
@@ -69,7 +69,7 @@ if ($query !== "") {
     pointer-events: none;
     z-index: 0;
   }
-
+ 
   .container {
     position: relative;
     z-index: 1;
@@ -77,7 +77,7 @@ if ($query !== "") {
     margin: 0 auto;
     padding: 48px 20px 80px;
   }
-
+ 
   /* HEADER */
   header {
     display: flex;
@@ -108,7 +108,7 @@ if ($query !== "") {
     transition: all 0.2s;
   }
   nav a:hover { color: var(--accent); border-color: var(--accent); }
-
+ 
   /* HERO */
   .hero {
     margin-bottom: 48px;
@@ -127,7 +127,7 @@ if ($query !== "") {
     display: block;
   }
   .hero p { color: var(--muted); font-size: 1rem; max-width: 420px; }
-
+ 
   /* SEARCH */
   .search-wrap {
     display: flex;
@@ -162,7 +162,7 @@ if ($query !== "") {
     transition: background 0.2s;
   }
   .search-wrap button:hover { background: #f8d060; }
-
+ 
   /* STATUS BAR */
   .status {
     display: flex;
@@ -178,7 +178,7 @@ if ($query !== "") {
   .status .count { color: var(--accent); font-weight: 600; }
   .status .total { color: var(--muted); }
   .status .total strong { color: var(--text); }
-
+ 
   /* CARDS */
   .packages { display: flex; flex-direction: column; gap: 12px; }
   .pkg-card {
@@ -203,7 +203,7 @@ if ($query !== "") {
   .pkg-card:nth-child(3) { animation-delay: 0.15s; }
   .pkg-card:nth-child(4) { animation-delay: 0.20s; }
   .pkg-card:nth-child(5) { animation-delay: 0.25s; }
-
+ 
   .pkg-track {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.1rem;
@@ -231,7 +231,7 @@ if ($query !== "") {
     letter-spacing: 0;
     margin-top: -2px;
   }
-
+ 
   .empty {
     text-align: center;
     padding: 60px 20px;
@@ -239,7 +239,7 @@ if ($query !== "") {
   }
   .empty .icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.4; }
   .empty p { font-size: 0.95rem; }
-
+ 
   footer {
     margin-top: 80px;
     border-top: 1px solid var(--border);
@@ -258,19 +258,19 @@ if ($query !== "") {
       <a href="login.php">Нэвтрэх →</a>
     </nav>
   </header>
-
+ 
   <div class="hero">
     <h1>ИЛГЭЭМЖЭЭ<em>ХЯНАХ</em></h1>
     <p>Трек код эсвэл утасны дугаараар хайж, илгээмжийнхээ мэдээллийг авна уу.</p>
   </div>
-
+ 
   <form method="get" action="index.php">
     <div class="search-wrap">
       <input type="text" name="q" value="<?= htmlspecialchars($query) ?>" placeholder="Трек код эсвэл утасны дугаар...">
       <button type="submit">ХАЙХ</button>
     </div>
   </form>
-
+ 
   <?php if ($query !== ""): ?>
     <div class="status">
       <span class="count"><?= $message ?></span>
@@ -279,7 +279,7 @@ if ($query !== "") {
       <?php endif; ?>
     </div>
   <?php endif; ?>
-
+ 
   <?php if ($packages): ?>
     <div class="packages">
       <?php foreach ($packages as $p): ?>
@@ -309,7 +309,7 @@ if ($query !== "") {
       <p>Дээрх талбарт трек код эсвэл утасны дугаараа бичнэ үү.</p>
     </div>
   <?php endif; ?>
-
+ 
   <footer>© 2026 Карго.МН — Бүх эрх хуулиар хамгаалагдсан</footer>
 </div>
 </body>
